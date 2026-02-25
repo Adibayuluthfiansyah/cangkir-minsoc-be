@@ -11,4 +11,92 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  // url      = env("DATABASE_URL")
+}
+
+enum AuthProvider {
+  LOCAL
+  GOOGLE
+  FACEBOOK
+}
+
+enum UserRole {
+  CUSTOMER
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum DayType {
+  WEEKDAY
+  WEEKEND
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  PAID
+  COMPLETED
+  CANCELLED
+  REJECTED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  EXPIRED
+}
+
+enum PaymentMethod {
+  MIDTRANS
+  MANUAL_TRANSFER
+  CASH
+}
+
+enum NotificationType {
+  BOOKING_REMINDER
+  PAYMENT_REMINDER
+  BOOKING_CONFIRMED
+  BOOKING_CANCELLED
+  PAYMENT_SUCCESS
+}
+
+// users
+model User {
+  id            String       @id @default(uuid())
+  email         String?      @unique
+  phone         String?      @unique
+  fullName      String       @map("full_name")
+  passwordHash  String?      @map("password_hash")
+  authProvider  AuthProvider @default(LOCAL) @map("auth_provider")
+  avatarUrl     String?      @map("avatar_url")
+  emailVerified Boolean      @default(false) @map("email_verified")
+  phoneVerified Boolean      @default(false) @map("phone_verified")
+  role          UserRole     @default(CUSTOMER)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+// timeslot
+model TimeSlot {
+  id          String  @id @default(uuid())
+  name        String
+  startTime   String  @map("start_time")
+  endTime     String  @map("end_time")
+  dayType     DayType @map("day_type")
+  price       Decimal @db.Decimal(10, 2)
+  isActive    Boolean @default(true) @map("is_active")
+  description String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // bookings Booking[]
+
+  @@index([dayType])
+  @@index([isActive])
+  @@map("time_slots")
 }
