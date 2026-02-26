@@ -1,0 +1,47 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: cangkir-postgres
+    restart: unless-stopped
+    ports:
+      - '5434:5432'
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+      POSTGRES_DB: cangkir_minisoccer
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - cangkir-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: cangkir-redis
+    restart: unless-stopped
+    ports:
+      - '6380:6379'
+    volumes:
+      - redis_data:/data
+    networks:
+      - cangkir-network
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: cangkir-redis-commander
+    restart: unless-stopped
+    ports:
+      - '8081:8081'
+    environment:
+      - REDIS_HOSTS=local:cangkir-redis:6379
+    networks:
+      - cangkir-network
+    depends_on:
+      - redis
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  cangkir-network:
+    driver: bridge
