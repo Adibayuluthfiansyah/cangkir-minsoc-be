@@ -13,18 +13,6 @@ datasource db {
   provider = "postgresql"
 }
 
-enum AuthProvider {
-  LOCAL
-  GOOGLE
-  FACEBOOK
-}
-
-enum UserRole {
-  CUSTOMER
-  ADMIN
-  SUPER_ADMIN
-}
-
 enum DayType {
   WEEKDAY
   WEEKEND
@@ -33,160 +21,85 @@ enum DayType {
 enum BookingStatus {
   PENDING
   CONFIRMED
-  PAID
   COMPLETED
   CANCELLED
-  REJECTED
-}
-
-enum PaymentStatus {
-  PENDING
-  SUCCESS
-  FAILED
-  EXPIRED
 }
 
 enum PaymentMethod {
-  MIDTRANS
-  MANUAL_TRANSFER
   CASH
+  TRANSFER
 }
 
-enum NotificationType {
-  BOOKING_REMINDER
-  PAYMENT_REMINDER
-  BOOKING_CONFIRMED
-  BOOKING_CANCELLED
-  PAYMENT_SUCCESS
+enum PaymentStatus {
+  UNPAID
+  PAID
 }
 
-// users
-model User {
-  id                      String       @id @default(uuid())
-  email                   String?      @unique
-  phone                   String?      @unique
-  fullName                String       @map("full_name")
-  passwordHash            String?      @map("password_hash") // null for oauth users
-  authProvider            AuthProvider @default(LOCAL) @map("auth_provider")
-  oauthId                 String?      @map("oauth_id")
-  avatarUrl               String?      @map("avatar_url")
-  emailVerified           Boolean      @default(false) @map("email_verified")
-  phoneVerified           Boolean      @default(false) @map("phone_verified")
-  emailVerificationToken  String?      @map("email_verification_token")
-  emailVerificationExpiry DateTime?    @map("email_verification_expiry")
-
-  // Password reset tokens
-  passwordResetToken  String?   @map("password_reset_token")
-  passwordResetExpiry DateTime? @map("password_reset_expiry")
-  role                UserRole  @default(CUSTOMER)
-  isActive            Boolean   @default(true) @map("is_active")
-  lastLoginAt         DateTime? @map("last_login_at")
-  createdAt           DateTime  @default(now()) @map("created_at")
-  updatedAt           DateTime  @updatedAt @map("updated_at")
-  bookings            Booking[]
-  // notifications Notification[]
-
-  @@index([email])
-  @@index([phone])
-  @@index([authProvider])
-  @@index([emailVerified])
-  @@map("users")
-}
-
-// timeslot
+// Time Slots
 model TimeSlot {
-  id          String  @id @default(uuid())
+  id          String    @id @default(uuid())
   name        String
-  // Time in 'HH:mm' 24-hour format (e.g. '09:30')
-  startTime   String  @map("start_time")
-  // Time in 'HH:mm' 24-hour format (e.g. '24:00')
-  endTime     String  @map("end_time")
-  dayType     DayType @map("day_type")
-  price       Decimal @db.Decimal(10, 2)
-  isActive    Boolean @default(true) @map("is_active")
-  description String?
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  bookings Booking[]
+  startTime   String    @map("start_time")
+  endTime     String    @map("end_time")
+  dayType     DayType   @map("day_type")
+  price       Decimal   @db.Decimal(10, 2)
+  isActive    Boolean   @default(true) @map("is_active")
+  description String?   @db.Text
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  bookings    Booking[]
 
   @@index([dayType])
   @@index([isActive])
   @@map("time_slots")
 }
 
-// bookings
+// Bookings 
 model Booking {
-  id               String        @id @default(uuid())
-  bookingCode      String        @unique @map("booking_code")
-  userId           String        @map("user_id")
-  user             User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  timeSlotId       String        @map("time_slot_id")
-  timeSlot         TimeSlot      @relation(fields: [timeSlotId], references: [id], onDelete: Restrict)
-  bookingDate      DateTime      @map("booking_date") @db.Date
-  startTime        String        @map("start_time")
-  endTime          String        @map("end_time")
-  totalHours       Decimal       @map("total_hours") @db.Decimal(4, 2)
-  basePrice        Decimal       @map("base_price") @db.Decimal(10, 2)
-  addonPrice       Decimal       @default(0) @map("addon_price") @db.Decimal(10, 2)
-  discount         Decimal       @default(0) @db.Decimal(10, 2)
-  totalPrice       Decimal       @map("total_price") @db.Decimal(10, 2)
-  customerName     String        @map("customer_name")
-  customerEmail    String?       @map("customer_email")
-  customerPhone    String        @map("customer_phone")
-  notes            String?       @db.Text
-  status           BookingStatus @default(PENDING)
-  confirmedAt      DateTime?     @map("confirmed_at")
-  completedAt      DateTime?     @map("completed_at")
-  cancelledAt      DateTime?     @map("cancelled_at")
-  cancellationNote String?       @map("cancellation_note") @db.Text
-  createdAt        DateTime      @default(now()) @map("created_at")
-  updatedAt        DateTime      @updatedAt @map("updated_at")
+  id             String        @id @default(uuid())
+  bookingCode    String        @map("booking_code")
+  bookingGroupId String?       @map("booking_group_id")
+  customerName   String        @map("customer_name")
+  customerPhone  String        @map("customer_phone")
+  customerEmail  String?       @map("customer_email")
+  customerNotes  String?       @map("customer_notes") @db.Text
+  timeSlotId     String        @map("time_slot_id")
+  timeSlot       TimeSlot      @relation(fields: [timeSlotId], references: [id], onDelete: Restrict)
+  bookingDate    DateTime      @map("booking_date") @db.Date
+  totalHours     Decimal       @map("total_hours") @db.Decimal(4, 2)
+  totalPrice     Decimal       @map("total_price") @db.Decimal(10, 2)
+  paymentMethod  PaymentMethod @map("payment_method")
+  paymentStatus  PaymentStatus @default(UNPAID) @map("payment_status")
+  paymentNote    String?       @map("payment_note") @db.Text
+  status         BookingStatus @default(PENDING)
+  adminNote      String?       @map("admin_note") @db.Text
+  confirmedAt    DateTime?     @map("confirmed_at")
+  completedAt    DateTime?     @map("completed_at")
+  cancelledAt    DateTime?     @map("cancelled_at")
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
 
-  // Relations
-  // payment       Payment?
-  // notifications Notification[]
-  payment Payment?
-
-  @@index([userId])
-  @@index([timeSlotId])
+  @@unique([bookingDate, timeSlotId])
+  @@index([bookingCode])
+  @@index([bookingGroupId])
+  @@index([customerPhone])
   @@index([bookingDate])
   @@index([status])
-  @@index([bookingCode])
   @@map("bookings")
 }
 
-// payment
+// admin
+model Admin {
+  id           String    @id @default(uuid())
+  username     String    @unique
+  passwordHash String    @map("password_hash")
+  fullName     String    @map("full_name")
+  phone        String    @unique
+  isActive     Boolean   @default(true) @map("is_active")
+  lastLoginAt  DateTime? @map("last_login_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
 
-model Payment {
-  id        String  @id @default(uuid())
-  bookingId String  @unique @map("booking_id")
-  booking   Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-
-  // Payment details
-  amount Decimal       @db.Decimal(10, 2)
-  method PaymentMethod
-  status PaymentStatus @default(PENDING)
-
-  // Midtrans specific
-  midtransOrderId       String?   @unique @map("midtrans_order_id")
-  midtransTransactionId String?   @unique @map("midtrans_transaction_id")
-  midtransSnapToken     String?   @map("midtrans_snap_token")
-  midtransPaymentType   String?   @map("midtrans_payment_type")
-  transferProofUrl      String?   @map("transfer_proof_url")
-  transferAccountName   String?   @map("transfer_account_name")
-  transferNote          String?   @map("transfer_note") @db.Text
-  paidAt                DateTime? @map("paid_at")
-  expiredAt             DateTime? @map("expired_at")
-  failedAt              DateTime? @map("failed_at")
-  failureNote           String?   @map("failure_note") @db.Text
-  webhookData           Json?     @map("webhook_data")
-  createdAt             DateTime  @default(now()) @map("created_at")
-  updatedAt             DateTime  @updatedAt @map("updated_at")
-
-  @@index([bookingId])
-  @@index([status])
-  @@index([midtransOrderId])
-  @@map("payments")
+  @@index([username])
+  @@map("admins")
 }
