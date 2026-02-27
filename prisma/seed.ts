@@ -4,7 +4,6 @@ import { Pool } from 'pg';
 import { parse } from 'pg-connection-string';
 import * as bcrypt from 'bcrypt';
 
-// Parse connection string dari environment variable
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString) {
   throw new Error('DATABASE_URL is not set in environment variables');
@@ -12,7 +11,6 @@ if (!connectionString) {
 
 const parsed = parse(connectionString);
 
-// Buat pool dari parsed connection string
 const pool = new Pool({
   host: process.env.DB_HOST || parsed.host || 'localhost',
   port: parseInt(process.env.DB_PORT || String(parsed.port) || '5432', 10),
