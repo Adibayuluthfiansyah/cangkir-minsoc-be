@@ -4,11 +4,13 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { Logger } from 'nestjs-pino';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
   app.useLogger(app.get(Logger));
   app.use(helmet());
+  app.useGlobalFilters(new HttpExceptionFilter());
   app.enableCors({
     origin: process.env.CORS_ORIGINS?.split(',') || ['http://localhost:5173'],
     credentials: true,
@@ -65,21 +67,28 @@ async function bootstrap() {
   logger.log(`API Documentation: http://localhost:${port}/api/docs`);
   logger.log(` Environment: ${process.env.NODE_ENV || 'development'}`);
 
-  process.on('SIGTERM', () => {
-    void (async () => {
-      logger.log('SIGTERM signal received: closing HTTP server');
-      await app.close();
-      logger.log('HTTP server closed');
-    })();
-  });
+  // graceful shutdown
+  let isShuttingDown = false;
+  const gracefulShutdown = async (signal: string) => {
+    if (isShuttingDown) {
+      logger.warn(`${signal} received again, forcefully exiting...`);
+      process.exit(1);
+    }
 
-  process.on('SIGINT', () => {
-    void (async () => {
-      logger.log('SIGINT signal received: closing HTTP server');
+    isShuttingDown = true;
+    logger.log(`${signal} signal received: closing HTTP server`);
+
+    try {
       await app.close();
-      logger.log('HTTP server closed');
-    })();
-  });
+      logger.log('HTTP server closed successfully');
+      process.exit(0);
+    } catch (error) {
+      logger.error('Error during shutdown:', error);
+      process.exit(1);
+    }
+  };
+  process.once('SIGTERM', () => void gracefulShutdown('SIGTERM'));
+  process.once('SIGINT', () => void gracefulShutdown('SIGINT'));
 }
 
 bootstrap().catch((err) => {

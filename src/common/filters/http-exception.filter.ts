@@ -32,8 +32,11 @@ export class HttpExceptionFilter implements ExceptionFilter {
       timestamp: new Date().toISOString(),
       path: request.url,
       method: request.method,
-      message: typeof message === 'string' ? message : (message as any).message,
       ...(typeof message === 'object' && message !== null ? message : {}),
+      message:
+        typeof message === 'string'
+          ? message
+          : (message as any).message || 'Internal server error',
     };
 
     if (status >= 500) {

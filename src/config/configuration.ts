@@ -8,7 +8,24 @@ export default () => ({
   },
 
   jwt: {
-    secret: process.env.JWT_SECRET || 'your_super_secret_jwt_key',
+    secret: (() => {
+      const secret = process.env.JWT_SECRET;
+
+      // production
+      if (process.env.NODE_ENV === 'production' && !secret) {
+        throw new Error(
+          'CRITICAL: JWT_SECRET is required in production environment. ' +
+            "Generate one using: node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\"",
+        );
+      }
+      // development
+      if (!secret) {
+        console.warn(' WARNING: Using default JWT_SECRET. This is insecure!');
+        return 'your_super_secret_jwt_key_for_development_only';
+      }
+
+      return secret;
+    })(),
     expiresIn: process.env.JWT_EXPIRATION || '7d',
   },
 

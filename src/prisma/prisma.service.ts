@@ -16,15 +16,13 @@ export class PrismaService
     if (!connectionString) {
       throw new Error('DATABASE_URL is not set in environment variables');
     }
-
-    // Parse connection string untuk extract credentials
     const parsed = parse(connectionString);
-
-    // Buat pool dengan config dari connection string
-    // Bisa di-override dengan env variables individual (DB_HOST, DB_PORT, dll)
     const pool = new Pool({
       host: process.env.DB_HOST || parsed.host || 'localhost',
-      port: parseInt(process.env.DB_PORT || String(parsed.port) || '5432', 10),
+      port: parseInt(
+        process.env.DB_PORT || (parsed.port?.toString() ?? '5432'),
+        10,
+      ),
       user: process.env.DB_USER || parsed.user || 'postgres',
       password: process.env.DB_PASSWORD || parsed.password || '',
       database: process.env.DB_NAME || parsed.database || 'postgres',
