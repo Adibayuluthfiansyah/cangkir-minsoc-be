@@ -79,7 +79,7 @@ model Booking {
   updatedAt      DateTime      @updatedAt @map("updated_at")
 
   @@unique([bookingDate, timeSlotId])
-  @@index([bookingCode])
+  @@unique([bookingCode])
   @@index([bookingGroupId])
   @@index([customerPhone])
   @@index([bookingDate])

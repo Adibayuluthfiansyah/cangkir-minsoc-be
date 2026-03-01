@@ -5,6 +5,11 @@ import { LoggerModule } from 'nestjs-pino';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
+import { RedisModule } from './redis/redis.module';
+import { BookingModule } from './booking/booking.module';
+import { AdminModule } from './admin/admin.module';
+import { TimeSlotModule } from './time-slot/time-slot.module';
+import { HealthModule } from './health/health.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -43,8 +48,12 @@ import configuration from './config/configuration';
         limit: 10,
       },
     ]),
-
     PrismaModule,
+    RedisModule,
+    BookingModule,
+    AdminModule,
+    TimeSlotModule,
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
