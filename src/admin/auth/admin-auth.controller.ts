@@ -14,10 +14,10 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { AdminAuthService } from './admin-auth.service';
-import { LoginDto, LoginResponseDto } from './dto/login.dto';
-import { AdminJwtGuard } from '../common/guards/admin-jwt.guard';
-import { CurrentAdmin } from '../common/decorators/current-admin.decorator';
-import type { AdminJwtPayload } from '../common/types/admin-jwt-payload.type';
+import { LoginDto, LoginResponseDto } from '../dto/login.dto';
+import { AdminJwtGuard } from '../../common/guards/admin-jwt.guard';
+import { CurrentAdmin } from '../../common/decorators/current-admin.decorator';
+import type { AdminJwtPayload } from '../../common/types/admin-jwt-payload.type';
 
 @ApiTags('Admin Auth')
 @Controller('admin/auth')

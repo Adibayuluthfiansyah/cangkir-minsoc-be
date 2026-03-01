@@ -18,9 +18,9 @@ import {
   ApiParam,
 } from '@nestjs/swagger';
 import { AdminTimeSlotService } from './admin-time-slot.service';
-import { AdminJwtGuard } from '../common/guards/admin-jwt.guard';
-import { CreateTimeSlotDto } from './dto/time-slot/create-time-slot.dto';
-import { UpdateTimeSlotDto } from './dto/time-slot/update-time-slot.dto';
+import { AdminJwtGuard } from '../../common/guards/admin-jwt.guard';
+import { CreateTimeSlotDto } from '../dto/time-slot/create-time-slot.dto';
+import { UpdateTimeSlotDto } from '../dto/time-slot/update-time-slot.dto';
 
 @ApiTags('Admin Time Slots')
 @Controller('admin/time-slots')

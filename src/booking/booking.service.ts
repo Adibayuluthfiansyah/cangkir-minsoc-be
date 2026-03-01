@@ -89,7 +89,9 @@ export class BookingService {
     }
 
     //  distributed lock to prevent race conditions
-    const lockKey = `booking:lock:${dto.bookingDate}:${dto.timeSlotIds.sort().join(',')}`;
+    // const lockKey = `booking:lock:${dto.bookingDate}:${dto.timeSlotIds.sort().join(',')}`;
+    const sortedIds = [...dto.timeSlotIds].sort();
+    const lockKey = `booking:lock:${dto.bookingDate}:${sortedIds.join(',')}`;
 
     try {
       return await this.redis.withLock(

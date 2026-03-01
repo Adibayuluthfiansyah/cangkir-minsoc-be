@@ -3,6 +3,7 @@ import {
   Get,
   Param,
   HttpStatus,
+  ParseEnumPipe,
   NotFoundException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
@@ -11,6 +12,7 @@ import {
   TimeSlotListResponseDto,
   TimeSlotDto,
 } from './dto/time-slot-response.dto';
+import { DayType } from '@prisma/client';
 
 @ApiTags('Time Slots')
 @Controller('time-slots')
@@ -46,7 +48,9 @@ export class TimeSlotController {
     description: 'Time slots retrieved successfully',
     type: [TimeSlotDto],
   })
-  findByDayType(@Param('dayType') dayType: 'WEEKDAY' | 'WEEKEND') {
+  findByDayType(
+    @Param('dayType', new ParseEnumPipe(DayType)) dayType: DayType,
+  ) {
     return this.timeSlotService.findByDayType(dayType);
   }
 

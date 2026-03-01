@@ -5,7 +5,7 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { AdminTimeSlotService } from './admin-time-slot.service';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 
 describe('AdminTimeSlotService', () => {

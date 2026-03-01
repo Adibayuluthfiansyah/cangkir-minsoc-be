@@ -1,15 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { AdminBookingService } from './admin-booking.service';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
 import {
   BookingStatusFilter,
   PaymentStatusFilter,
-} from './dto/admin-query.dto';
+} from '../dto/admin-query.dto';
 import {
   BookingStatusUpdate,
   PaymentStatusUpdate,
-} from './dto/update-booking.dto';
+} from '../dto/update-booking.dto';
 
 describe('AdminBookingService', () => {
   let service: AdminBookingService;

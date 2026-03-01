@@ -4,9 +4,9 @@ import {
   BadRequestException,
   ConflictException,
 } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { CreateTimeSlotDto } from './dto/time-slot/create-time-slot.dto';
-import { UpdateTimeSlotDto } from './dto/time-slot/update-time-slot.dto';
+import { PrismaService } from '../../prisma/prisma.service';
+import { CreateTimeSlotDto } from '../dto/time-slot/create-time-slot.dto';
+import { UpdateTimeSlotDto } from '../dto/time-slot/update-time-slot.dto';
 import { Prisma } from '@prisma/client';
 
 @Injectable()

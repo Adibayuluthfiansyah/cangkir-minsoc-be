@@ -16,16 +16,16 @@ import {
   ApiParam,
 } from '@nestjs/swagger';
 import { AdminBookingService } from './admin-booking.service';
-import { AdminJwtGuard } from '../common/guards/admin-jwt.guard';
-import { AdminBookingQueryDto } from './dto/admin-query.dto';
+import { AdminJwtGuard } from '../../common/guards/admin-jwt.guard';
+import { AdminBookingQueryDto } from '../dto/admin-query.dto';
 import {
   UpdateBookingStatusDto,
   UpdatePaymentStatusDto,
-} from './dto/update-booking.dto';
+} from '../dto/update-booking.dto';
 import {
   AdminBookingListResponseDto,
   AdminBookingDetailDto,
-} from './dto/admin-booking-response.dto';
+} from '../dto/admin-booking-response.dto';
 
 @ApiTags('Admin Bookings')
 @Controller('admin/bookings')

@@ -3,21 +3,24 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
 import {
   AdminBookingQueryDto,
   BookingStatusFilter,
   PaymentStatusFilter,
-} from './dto/admin-query.dto';
+} from '../dto/admin-query.dto';
 import {
   UpdateBookingStatusDto,
   UpdatePaymentStatusDto,
-} from './dto/update-booking.dto';
+} from '../dto/update-booking.dto';
 import {
   AdminBookingListResponseDto,
   AdminBookingDetailDto,
-} from './dto/admin-booking-response.dto';
-import { parseDateString, formatDateString } from '../common/utils/date.helper';
+} from '../dto/admin-booking-response.dto';
+import {
+  parseDateString,
+  formatDateString,
+} from '../../common/utils/date.helper';
 
 @Injectable()
 export class AdminBookingService {
@@ -65,11 +68,17 @@ export class AdminBookingService {
     }
 
     // get total count
-    const total = await this.prisma.booking.count({ where });
+    const uniqueBookingCount = await this.prisma.booking.findMany({
+      where,
+      distinct: ['bookingCode'],
+      select: { bookingCode: true },
+    });
+    const total = uniqueBookingCount.length;
 
-    // get paginated bookings (group by booking code to avoid duplicates)
+    // get booking unique
     const bookings = await this.prisma.booking.findMany({
       where,
+      distinct: ['bookingCode'],
       include: {
         timeSlot: true,
       },
@@ -78,22 +87,14 @@ export class AdminBookingService {
       take: limit,
     });
 
-    // group by booking code to get unique bookings
-    const uniqueBookingsMap = new Map();
-    bookings.forEach((booking) => {
-      if (!uniqueBookingsMap.has(booking.bookingCode)) {
-        uniqueBookingsMap.set(booking.bookingCode, booking);
-      }
-    });
-
-    const data = Array.from(uniqueBookingsMap.values()).map((booking) => ({
+    const data = bookings.map((booking) => ({
       id: booking.id,
       bookingCode: booking.bookingCode,
       bookingGroupId: booking.bookingGroupId || '',
       customerName: booking.customerName,
       customerPhone: booking.customerPhone,
       customerEmail: booking.customerEmail || undefined,
-      bookingDate: formatDateString(booking.bookingDate as Date),
+      bookingDate: formatDateString(booking.bookingDate),
       timeSlotName: booking.timeSlot.name,
       totalHours: Number(booking.totalHours),
       totalPrice: Number(booking.totalPrice),

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDateString, IsNotEmpty, IsOptional } from 'class-validator';
+import { Matches, IsNotEmpty, IsOptional } from 'class-validator';
 
 export class CheckAvailabilityDto {
   @ApiProperty({
@@ -7,7 +7,9 @@ export class CheckAvailabilityDto {
     example: '2026-03-15',
     format: 'date',
   })
-  @IsDateString()
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, {
+    message: 'date must be in YYYY-MM-DD format',
+  })
   @IsNotEmpty()
   date: string;
 

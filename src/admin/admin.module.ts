@@ -2,12 +2,12 @@ import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PrismaModule } from '../prisma/prisma.module';
-import { AdminAuthService } from './admin-auth.service';
-import { AdminBookingService } from './admin-booking.service';
-import { AdminAuthController } from './admin-auth.controller';
-import { AdminBookingController } from './admin-booking.controller';
-import { AdminTimeSlotService } from './admin-time-slot.service';
-import { AdminTimeSlotController } from './admin-time-slot.controller';
+import { AdminAuthService } from './auth/admin-auth.service';
+import { AdminBookingService } from './booking-admin/admin-booking.service';
+import { AdminAuthController } from './auth/admin-auth.controller';
+import { AdminBookingController } from './booking-admin/admin-booking.controller';
+import { AdminTimeSlotService } from './timeslot-admin/admin-time-slot.service';
+import { AdminTimeSlotController } from './timeslot-admin/admin-time-slot.controller';
 
 @Module({
   imports: [
