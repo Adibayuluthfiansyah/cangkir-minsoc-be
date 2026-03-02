@@ -8,7 +8,7 @@ describe('booking-code.generator', () => {
     it('should generate booking code with correct format BKG-YYYYMMDD-XXX', () => {
       const date = new Date('2026-03-15');
       const code = generateBookingCode(1, date);
-      expect(code).toMatch(/^BKG-20260315-001-[A-Z0-9]{4}$/);
+      expect(code).toMatch(/^BKG-20260315-001$/);
     });
 
     it('should pad sequence number to 3 digits', () => {
@@ -136,9 +136,9 @@ describe('booking-code.generator', () => {
       });
     });
 
-    it('should parse booking code with 4-digit sequence', () => {
+    it('should return null for 4-digit sequence (invalid format)', () => {
       const result = parseBookingCode('BKG-20260315-1000');
-      expect(result).toBeNull(); // Only 3-digit sequences are valid
+      expect(result).toBeNull(); // Only exactly 3-digit sequences are valid
     });
 
     it('should return null for invalid format (missing prefix)', () => {
