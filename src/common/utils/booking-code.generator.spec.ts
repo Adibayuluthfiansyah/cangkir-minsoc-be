@@ -8,7 +8,7 @@ describe('booking-code.generator', () => {
     it('should generate booking code with correct format BKG-YYYYMMDD-XXX', () => {
       const date = new Date('2026-03-15');
       const code = generateBookingCode(1, date);
-      expect(code).toBe('BKG-20260315-001');
+      expect(code).toMatch(/^BKG-20260315-001-[A-Z0-9]{4}$/);
     });
 
     it('should pad sequence number to 3 digits', () => {
