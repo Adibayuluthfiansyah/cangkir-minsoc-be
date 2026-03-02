@@ -1,9 +1,9 @@
-import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import Redis from 'ioredis';
+import { Redis } from '@upstash/redis';
 
 @Injectable()
-export class RedisService implements OnModuleInit, OnModuleDestroy {
+export class RedisService implements OnModuleInit {
   private client: Redis;
   private readonly DEFAULT_LOCK_TTL = 30;
   private readonly DEFAULT_LOCK_RETRY_DELAY = 100;
@@ -12,30 +12,35 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   constructor(private readonly config: ConfigService) {}
 
   onModuleInit() {
-    this.client = new Redis({
-      host: this.config.get<string>('REDIS_HOST') || 'localhost',
-      port: this.config.get<number>('REDIS_PORT') || 6379,
-      password: this.config.get<string>('REDIS_PASSWORD') || undefined,
-      db: this.config.get<number>('REDIS_DB') || 0,
-      retryStrategy: (times: number) => {
-        const delay = Math.min(times * 50, 2000);
-        return delay;
-      },
-    });
+    const upstashUrl = this.config.get<string>('UPSTASH_REDIS_REST_URL');
+    const upstashToken = this.config.get<string>('UPSTASH_REDIS_REST_TOKEN');
 
-    this.client.on('error', (err) => {
-      console.error('Redis Client Error:', err);
-    });
-
-    this.client.on('connect', () => {
-      console.log('Redis Client Connected');
-    });
-  }
-
-  onModuleDestroy() {
-    if (this.client) {
-      this.client.disconnect();
+    if (!upstashUrl || !upstashToken) {
+      throw new Error(
+        'UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN must be set',
+      );
     }
+
+    this.client = new Redis({
+      url: upstashUrl,
+      token: upstashToken,
+    });
+
+    console.log('✅ Redis REST Client Initialized');
+    console.log('🔧 Redis Configuration:', {
+      url: upstashUrl,
+      hasToken: !!upstashToken,
+    });
+
+    // Test connection
+    this.client
+      .ping()
+      .then(() => {
+        console.log('✅ Redis REST Client Connected - PING successful');
+      })
+      .catch((err) => {
+        console.error('❌ Redis REST Client Connection Failed:', err.message);
+      });
   }
 
   getClient(): Redis {
@@ -52,7 +57,11 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     const lockId = `${Date.now()}-${Math.random()}`;
 
     for (let i = 0; i < retryCount; i++) {
-      const result = await this.client.set(key, lockId, 'EX', ttl, 'NX');
+      // Upstash REST API: set with NX and EX options
+      const result = await this.client.set(key, lockId, {
+        nx: true,
+        ex: ttl,
+      });
 
       if (result === 'OK') {
         return lockId;
@@ -76,7 +85,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
       end
     `;
 
-    const result = await this.client.eval(script, 1, key, lockId);
+    const result = await this.client.eval(script, [key], [lockId]);
     return result === 1;
   }
 
@@ -114,7 +123,8 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
 
   async set(key: string, value: string, ttl?: number): Promise<void> {
     if (ttl) {
-      await this.client.set(key, value, 'EX', ttl);
+      // Upstash REST API: set with EX option
+      await this.client.set(key, value, { ex: ttl });
     } else {
       await this.client.set(key, value);
     }
