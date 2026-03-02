@@ -13,7 +13,7 @@ import {
   BookingResponseDto,
   AvailabilityResponseDto,
   CancelBookingResponseDto,
-  TimeSlotDto,
+  BookingTimeSlotDto,
 } from './dto/booking-response.dto';
 import { generateBookingCode } from '../common/utils/booking-code.generator';
 import {
@@ -250,7 +250,7 @@ export class BookingService {
     }
 
     const firstBooking = bookings[0];
-    const timeSlots: TimeSlotDto[] = bookings.map((b) => ({
+    const timeSlots: BookingTimeSlotDto[] = bookings.map((b) => ({
       id: b.timeSlot.id,
       name: b.timeSlot.name,
       startTime: b.timeSlot.startTime,

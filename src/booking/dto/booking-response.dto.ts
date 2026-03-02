@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class TimeSlotDto {
+export class BookingTimeSlotDto {
   @ApiProperty({ example: '123e4567-e89b-12d3-a456-426614174000' })
   id: string;
 
@@ -58,10 +58,10 @@ export class BookingResponseDto {
   status: string;
 
   @ApiProperty({
-    type: [TimeSlotDto],
+    type: [BookingTimeSlotDto],
     description: 'Array of booked time slots',
   })
-  timeSlots: TimeSlotDto[];
+  timeSlots: BookingTimeSlotDto[];
 
   @ApiProperty({
     example:
@@ -81,10 +81,10 @@ export class AvailabilityResponseDto {
   dayType: string;
 
   @ApiProperty({
-    type: [TimeSlotDto],
+    type: [BookingTimeSlotDto],
     description: 'Array of available time slots',
   })
-  availableSlots: TimeSlotDto[];
+  availableSlots: BookingTimeSlotDto[];
 
   @ApiProperty({
     type: [String],
