@@ -127,7 +127,7 @@ Atau install PostgreSQL dan Redis secara manual:
 
 ---
 
-## 🚀 Instalasi
+##  Instalasi
 
 ### 1. Clone Repository
 
@@ -295,10 +295,6 @@ npx prisma studio
 npx prisma db seed
 ```
 
-Default admin credentials:
-
-- Username: `superadmin`
-- Password: `superadmin123` (⚠️ GANTI segera!)
 
 ---
 
@@ -339,9 +335,9 @@ npm run test:cov
 
 - **Total Tests**: 228 tests
 - **Passing**: 213+ tests (93%+)
-- **Service Tests**: ✅ All passing
-- **Unit Tests**: ✅ All passing
-- **Controller Tests**: ⚠️ Some boilerplate tests failing (expected)
+- **Service Tests**: All passing
+- **Unit Tests**:  All passing
+- **Controller Tests**:  Some boilerplate tests failing (expected)
 
 ---
 
@@ -361,7 +357,6 @@ Lihat dokumentasi lengkap di folder `docs/`:
 
 - **[API_DOCUMENTATION.md](docs/API_DOCUMENTATION.md)** - Detailed API endpoints documentation
 - **[WORKFLOW.md](docs/WORKFLOW.md)** - Business logic dan workflow
-- **[DEPLOYMENT.md](docs/DEPLOYMENT.md)** - Deployment guide
 
 ### Main Endpoints
 
@@ -386,67 +381,6 @@ PATCH  /api/admin/bookings/:id        # Update booking status
 POST   /api/admin/time-slots          # Create time slot
 PUT    /api/admin/time-slots/:id      # Update time slot
 DELETE /api/admin/time-slots/:id      # Delete time slot
-```
-
----
-
-## 🚢 Deployment
-
-### Production Deployment Guide
-
-Lihat panduan lengkap deployment di [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
-
-### Quick Production Setup
-
-```bash
-# 1. Set NODE_ENV to production
-export NODE_ENV=production
-
-# 2. Update .env dengan production values
-# - Ganti semua passwords
-# - Set JWT_SECRET yang kuat
-# - Configure CORS_ORIGINS
-# - Set REDIS_PASSWORD
-
-# 3. Build aplikasi
-npm run build
-
-# 4. Apply migrations
-npx prisma migrate deploy
-
-# 5. Generate Prisma Client
-npx prisma generate
-
-# 6. Start application
-npm run start:prod
-```
-
-### Docker Deployment
-
-```bash
-# Build Docker image
-docker build -t cangkir-api .
-
-# Run container
-docker run -d -p 3000:3000 --env-file .env cangkir-api
-```
-
-### Nginx Configuration
-
-Sample Nginx configuration tersedia di:
-
-- `nginx/nginx.conf.development` - Development config
-- `nginx/nginx.conf.production` - Production config dengan SSL
-
-### Health Check
-
-Verify deployment:
-
-```bash
-curl http://your-domain.com/api/health
-
-# Expected response:
-# {"status":"ok","info":{...},"details":{...}}
 ```
 
 ---
@@ -496,13 +430,13 @@ Aplikasi ini menggunakan **Redis Distributed Locking** untuk mencegah race condi
 
 ### Masalah yang Diselesaikan:
 
-1. ❌ **Double Booking** - Dua user booking slot yang sama di waktu bersamaan
-2. ❌ **Duplicate Booking Codes** - Multiple bookings mendapat kode yang sama
-3. ❌ **Sequence Collision** - Race condition pada sequence generation
+1. **Double Booking** - Dua user booking slot yang sama di waktu bersamaan
+2. **Duplicate Booking Codes** - Multiple bookings mendapat kode yang sama
+3. **Sequence Collision** - Race condition pada sequence generation
 
 ### Solusi Implementasi:
 
-#### 1️⃣ **Distributed Lock**
+####  **Distributed Lock**
 
 ```typescript
 // Lock per date + time slots
@@ -514,14 +448,14 @@ await redis.withLock(lockKey, async () => {
 });
 ```
 
-#### 2️⃣ **Atomic Sequence**
+####  **Atomic Sequence**
 
 ```typescript
 // Redis INCR is atomic (no race condition)
 const sequence = await redis.incrementSequence(`booking:seq:${date}`);
 ```
 
-#### 3️⃣ **Database Unique Constraint**
+#### **Database Unique Constraint**
 
 ```sql
 CREATE UNIQUE INDEX ON bookings(booking_code);
@@ -529,103 +463,50 @@ CREATE UNIQUE INDEX ON bookings(booking_code);
 
 ### Karakteristik:
 
-- ⏱️ **Lock TTL**: 30 seconds
-- 🔄 **Retry**: 50 attempts with exponential backoff
-- 🎯 **Lock Scope**: Per date + time slot combination
-- 🔒 **Safety**: Triple protection (lock + atomic + constraint)
+- **Lock TTL**: 30 seconds
+- **Retry**: 50 attempts with exponential backoff
+- **Lock Scope**: Per date + time slot combination
+- **Safety**: Triple protection (lock + atomic + constraint)
 
-Lihat dokumentasi lengkap: [docs/RACE_CONDITION_FIX.md](docs/RACE_CONDITION_FIX.md)
+
 
 ---
 
-## 🔒 Keamanan
+##  Keamanan
 
 ### Security Features
 
-✅ **Authentication & Authorization**
+ **Authentication & Authorization**
 
 - JWT-based authentication
 - Password hashing dengan bcrypt
 - Protected admin routes
 
-✅ **Input Validation**
+ **Input Validation**
 
 - class-validator untuk semua DTO
 - Strict type checking dengan TypeScript
 - SQL injection protection (Prisma parameterized queries)
 
-✅ **Security Headers**
+ **Security Headers**
 
 - Helmet middleware
 - CORS configuration
 - XSS protection
 - Clickjacking protection
 
-✅ **Rate Limiting**
+**Rate Limiting**
 
 - Throttler untuk prevent spam
 - Configurable rate limits per endpoint
 
-✅ **Data Protection**
+**Data Protection**
 
 - Environment variables untuk secrets
 - Database unique constraints
 - Race condition protection
 
 ### Security Checklist
-
-Sebelum deploy ke production:
-
-- [ ] Ganti semua default passwords
-- [ ] Generate JWT_SECRET yang kuat (min 32 chars)
-- [ ] Set REDIS_PASSWORD
-- [ ] Configure CORS_ORIGINS dengan domain yang legitimate
-- [ ] Enable HTTPS/SSL
-- [ ] Set proper file permissions untuk .env (`chmod 600 .env`)
-- [ ] Setup database backup schedule
-- [ ] Configure firewall rules
-- [ ] Setup log rotation
-- [ ] Test health check endpoint
-
-Lihat panduan lengkap: [docs/PRODUCTION_SECURITY_CHECKLIST.md](docs/PRODUCTION_SECURITY_CHECKLIST.md)
-
----
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-**Problem**: Database connection refused
-
-```bash
-# Solution: Check if PostgreSQL is running
-docker-compose ps
-docker-compose up -d postgres
-```
-
-**Problem**: Redis connection error
-
-```bash
-# Solution: Check if Redis is running
-docker-compose ps
-docker-compose up -d redis
-```
-
-**Problem**: Migration failed
-
-```bash
-# Solution: Reset database
-npx prisma migrate reset
-npx prisma migrate deploy
-```
-
-**Problem**: Tests failing
-
-```bash
-# Solution: Regenerate Prisma Client
-npx prisma generate
-npm test
-```
 
 ---
 
